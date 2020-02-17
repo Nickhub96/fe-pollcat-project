@@ -13,7 +13,9 @@ export default class App extends Component {
   };
 
   componentDidMount() {
-    this.getLocationAsync();
+    this.getLocationAsync().then(() => {
+      this.getPlaceName(this.state.location);
+    });
   }
 
   getLocationAsync = async () => {
@@ -25,18 +27,32 @@ export default class App extends Component {
       });
     }
     let location = await Location.getCurrentPositionAsync({});
-    let placeName = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&key=${googleMapsAuth}`
-    );
     this.setState({ location });
+  };
+
+  getPlaceName = location => {
+    axios
+      .get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&result_type=administrative_area_level_2&key=${googleMapsAuth}`
+      )
+      .then(({ data }) => {
+        this.setState({
+          placeName: data.results[0].address_components[0].long_name
+        });
+      });
   };
 
   render() {
     let text = "Waiting..";
     if (this.state.errorMessage) {
       text = this.state.errorMessage;
-    } else if (this.state.location) {
-      text = JSON.stringify(this.state.location);
+    } else if (this.state.placeName === "Greater Manchester") {
+      text = `Great stuff, you are in ${this.state.placeName}!`;
+    } else if (
+      this.state.placeName &&
+      this.state.placeName !== "Greater Manchester"
+    ) {
+      text = `Oops! It appears Pollcat is not yet available in your area. Check back soon.`;
     }
 
     return (
