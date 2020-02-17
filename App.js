@@ -2,33 +2,32 @@ import React, { Component } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import * as Location from "expo-location";
 import * as Permissions from "expo-permissions";
+import axios from "axios";
+import googleMapsAuth from "./authkeys";
 
 export default class App extends Component {
   state = {
     location: null,
-    errorMessage: null
+    errorMessage: null,
+    placeName: null
   };
 
   componentDidMount() {
-    if (Platform.OS === "android" && !Constants.isDevice) {
-      this.setState({
-        errorMessage:
-          "Oops, this will not work on Sketch in an Android emulator. Try it on your device!"
-      });
-    } else {
-      this._getLocationAsync();
-    }
+    this.getLocationAsync();
   }
 
-  _getLocationAsync = async () => {
+  getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== "granted") {
       this.setState({
-        errorMessage: "Permission to access location was denied"
+        errorMessage:
+          "Please enable Location Services in your settings to join in on Pollcat"
       });
     }
-
     let location = await Location.getCurrentPositionAsync({});
+    let placeName = await axios.get(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&key=${googleMapsAuth}`
+    );
     this.setState({ location });
   };
 
