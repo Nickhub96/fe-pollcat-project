@@ -47,7 +47,7 @@ export default class App extends Component {
     if (this.state.errorMessage) {
       text = this.state.errorMessage;
     } else if (this.state.placeName === "Greater Manchester") {
-      text = `Great stuff, you are in ${this.state.placeName}!`;
+      text = `Great news, you are in Manchester!`;
     } else if (
       this.state.placeName &&
       this.state.placeName !== "Greater Manchester"
